@@ -17,7 +17,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,8 +26,14 @@
         </activity>
         <activity
             android:name=".DashboardActivity"
-            android:label="@string/title_activity_dashboard"
-            android:parentActivityName=".MainActivity" >
+            android:label="@string/title_activity_dashboard">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.openplant.MainActivity" />
+        </activity>
+        <activity
+            android:name=".HistoryActivity"
+            android:label="@string/title_activity_history">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.openplant.MainActivity" />

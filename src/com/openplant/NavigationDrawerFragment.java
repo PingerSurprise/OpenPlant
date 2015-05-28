@@ -129,6 +129,10 @@ public class NavigationDrawerFragment extends Fragment {
 				case 1:
 					intent = new Intent(getActivity().getBaseContext(), DashboardActivity.class);
 					break;
+					
+				case 2:
+					intent = new Intent(getActivity().getBaseContext(), HistoryActivity.class);
+					break;
 				}
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

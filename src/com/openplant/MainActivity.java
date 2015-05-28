@@ -2,8 +2,13 @@ package com.openplant;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.SoapFault;
 import org.ksoap2.serialization.SoapObject;
@@ -193,7 +198,7 @@ public class MainActivity extends Activity implements
 			// POUR UNE LISTE D'OBJETS
 			request.addProperty("title", title);
 			
-			// REQUETE
+			// Requête
 			envelope.bodyOut = request;
 			HttpTransportSE transport = new HttpTransportSE(wsdlPath);
 			try {
@@ -209,15 +214,7 @@ public class MainActivity extends Activity implements
 				return null;
 			}
 			
-			// POUR UN OBJET PRIMITIF
-//			SoapPrimitive results = null;
-//			try {
-//				results = (SoapPrimitive)envelope.getResponse();
-//			} catch (SoapFault e) {
-//				e.printStackTrace();
-//			}
-			
-			// POUR UNE LISTE D'OBJETS
+			// Récup depuis le service
 			SoapObject results = null;
 			try {
 				results = (SoapObject)envelope.getResponse();
@@ -226,29 +223,40 @@ public class MainActivity extends Activity implements
 				return null;
 			}
 			
+			if(results == null)
+				return null;
+			
 			List<String> data = new ArrayList<String>();
 			
-			// POUR UN OBJET PRIMITIF
-//			if(results != null && results.getValue() != null)
-//				data.add(results.getValue().toString());
-			
-			// POUR UNE LISTE D'OBJETS
-			if(results != null)
-				for(int i = 0; i < results.getPropertyCount(); i++)
-					data.add(results.getPropertyAsString(i));
+			// Conversion en liste
+			for(int i = 0; i < results.getPropertyCount(); i++)
+				data.add(results.getPropertyAsString(i));
 			
 			return data;
 		}
 		
+		// Fin de l'async
 		@Override
 		protected void onPostExecute(List<String> result) {
 			if(result == null)
 				return;
 			
 			StringBuilder sb = new StringBuilder();
+			String key = null;
+			JSONObject entity = null;
 			
-			for(String s: result)
-				sb.append(s + "\n");
+			for(String s: result) {
+				try {
+					entity = new JSONObject(s);
+					Iterator<?> keys = entity.keys();
+					while(keys.hasNext()) {
+						key = (String)keys.next();
+						sb.append(key + ": " + entity.getString(key) + "\n");
+					}
+				} catch (JSONException e) {
+					sb.append(s + "\n");
+				}
+			}
 			
 			new AlertDialog.Builder(MainActivity.this)
 				.setTitle("Results")

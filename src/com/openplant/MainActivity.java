@@ -31,10 +31,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.support.v4.widget.DrawerLayout;
 
 public class MainActivity extends Activity implements
-		NavigationDrawerFragment.NavigationDrawerCallbacks {
+		NavigationDrawerFragment.NavigationDrawerCallbacks, OnItemSelectedListener {
 
 	/**
 	 * Fragment managing the behaviors, interactions and presentation of the
@@ -47,7 +53,18 @@ public class MainActivity extends Activity implements
 	 * {@link #restoreActionBar()}.
 	 */
 	private CharSequence mTitle;
-
+	
+	private Spinner plantsSpinner;
+	private Button refreshButton;
+	
+	public Spinner getPlantsSpinner() {
+		return plantsSpinner;
+	}
+	
+	public Button getRefreshButton() {
+		return refreshButton;
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -60,11 +77,57 @@ public class MainActivity extends Activity implements
 		// Set up the drawer.
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
 				(DrawerLayout) findViewById(R.id.drawer_layout));
+	}
+	
+	@Override
+	public void onStart() {
+		super.onStart();
 		
-		// EXEMPLE
+		// VIEWS
+		plantsSpinner = (Spinner)findViewById(R.id.plantNameSpinner);
+		refreshButton = (Button)findViewById(R.id.refreshButton);
+		
+		ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(
+				this,
+				R.array.plant_names,
+				android.R.layout.simple_spinner_dropdown_item);
+		
+		spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		plantsSpinner.setAdapter(spinnerAdapter);
+		plantsSpinner.setSelection(spinnerAdapter.getPosition(getResources().getString(R.string.plant_1)));
+		plantsSpinner.setOnItemSelectedListener(this);
+		
+		refreshButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				asyncTask();
+			}
+		});
+		
+		// TASK
+		asyncTask();
+	}
+	
+	@Override
+	public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+		View spinner = (View)parent;
+		if(spinner.getId() == R.id.plantNameSpinner) {
+			asyncTask();
+		}
+    }
+	
+	@Override
+	public void onNothingSelected(AdapterView<?> arg0) {
+		// null		
+	}
+	
+	public void asyncTask() {
+		plantsSpinner.setClickable(false);
+		refreshButton.setClickable(false);
 		CouchClientTask task = new CouchClientTask();
-		task.execute("test", /*"8da4c108fcf9fc6a1b8c4f6792000450", */"huhuhu");
-	} 
+		task.setContext(this);
+		task.execute(plantsSpinner.getSelectedItem().toString());
+	}
 
 	@Override
 	public void onNavigationDrawerItemSelected(int position) {
@@ -77,17 +140,7 @@ public class MainActivity extends Activity implements
 	}
 
 	public void onSectionAttached(int number) {
-		switch (number) {
-		case 1:
-			mTitle = getString(R.string.title_section1);
-			break;
-		case 2:
-			mTitle = getString(R.string.title_section2);
-			break;
-		case 3:
-			mTitle = getString(R.string.title_section3);
-			break;
-		}
+		mTitle = getString(R.string.title_section1);
 	}
 
 	public void restoreActionBar() {
@@ -116,9 +169,6 @@ public class MainActivity extends Activity implements
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
 		return super.onOptionsItemSelected(item);
 	}
 
@@ -162,41 +212,35 @@ public class MainActivity extends Activity implements
 		}
 	}
 	
-	// EXEMPLE DE TACHE ASYNCHRONE
+	// TACHE ASYNCHRONE
 	private class CouchClientTask extends AsyncTask<String, Void, List<String>> {
 		
 		private static final String namespace = "http://tempuri.org/";
 		
 		private static final String wsdlPath =  "http://10.145.128.97:8734/NoSQLProject/Service/";
 		
-		// POUR UN OBJET PRIMITIF
-//		private static final String action = "GetJsonDocumentById";
+		private static final String action = "GetAverages";
 		
-		// POUR UNE LISTE D'OBJETS
-		private static final String action = "GetJsonDocumentsByTitle";
+		private MainActivity ctx;
+		
+		protected void setContext(MainActivity ctx) {
+			this.ctx = ctx;
+		}
 		
 		@Override
 		protected List<String> doInBackground(String... params) {
 			// ASSERTION
-			if(params.length < 2)
+			if(params.length < 1)
 				return null;
 			
-			String baseName = params[0];
-//			String id = params[1];		// UN OBJET
-			String title = params[1];	// UNE LISTE D'OBJETS
+			String plantName = params[0];
 			
 			SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
 			SoapObject request = new SoapObject(namespace, action);
 			
 			// DEFINITION DE LA REQUETE
 			envelope.dotNet = true;
-			request.addProperty("baseName", baseName);
-			
-			// POUR UN OBJET PRIMITIF
-//			request.addProperty("id", id);
-			
-			// POUR UNE LISTE D'OBJETS
-			request.addProperty("title", title);
+			request.addProperty("plantName", plantName);
 			
 			// Requête
 			envelope.bodyOut = request;
@@ -238,36 +282,31 @@ public class MainActivity extends Activity implements
 		// Fin de l'async
 		@Override
 		protected void onPostExecute(List<String> result) {
-			if(result == null)
-				return;
+			ctx.getPlantsSpinner().setClickable(true);
+			ctx.getRefreshButton().setClickable(true);
+			TextView humidityText = (TextView)ctx.findViewById(R.id.humidityText);
+			TextView luminosityText = (TextView)ctx.findViewById(R.id.luminosityText);
+			TextView plantType = (TextView)ctx.findViewById(R.id.plantType);
 			
-			StringBuilder sb = new StringBuilder();
-			String key = null;
-			JSONObject entity = null;
-			
-			for(String s: result) {
-				try {
-					entity = new JSONObject(s);
-					Iterator<?> keys = entity.keys();
-					while(keys.hasNext()) {
-						key = (String)keys.next();
-						sb.append(key + ": " + entity.getString(key) + "\n");
-					}
-				} catch (JSONException e) {
-					sb.append(s + "\n");
-				}
+			// AFFICHAGE
+			if(result != null && result.size() == 4) {
+				String humidity = result.get(2).replace(',', '.');
+				String luminosity = result.get(3).replace(',', '.');
+				
+				Double humidityRate = Double.parseDouble(humidity);
+				Double luminosityRate = Double.parseDouble(luminosity)/10.;
+				if(luminosityRate > 100)
+					luminosityRate = 100.;
+				
+				humidityText.setText(String.format("%.2f", humidityRate));
+				luminosityText.setText(String.format("%.2f", luminosityRate));
+				plantType.setText(result.get(1));
+			} else {
+				humidityText.setText("");
+				luminosityText.setText("");
+				plantType.setText("");
+				MessageManager.showError(ctx);
 			}
-			
-			new AlertDialog.Builder(MainActivity.this)
-				.setTitle("Results")
-				.setMessage(sb.toString())
-				.setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// null
-					}
-				})
-				.show();
 		}
 	}
 }

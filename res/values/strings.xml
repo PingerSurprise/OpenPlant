@@ -12,5 +12,12 @@
     <string name="title_activity_main">Tableau de bord</string>
     <string name="title_activity_dashboard">Tableau de bord</string>
     <string name="title_activity_history">Historique</string>
-
+    <string name="plant_1">PlanteLambda</string>
+    <string name="plant_2">Toto</string>
+    <string name="plant_3">Tata</string>
+    <string-array name="plant_names">
+        <item >@string/plant_1</item>
+        <item >@string/plant_2</item>
+        <item >@string/plant_3</item>
+    </string-array>
 </resources>

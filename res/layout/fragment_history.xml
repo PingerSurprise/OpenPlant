@@ -9,8 +9,27 @@
     tools:context="com.openplant.HistoryActivity$PlaceholderFragment" >
 
     <TextView
-        android:id="@+id/section_label"
+        android:id="@+id/textView1"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/section_label"
+        android:layout_alignTop="@+id/section_label"
+        android:text="Relevés du jour"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <Spinner
+        android:id="@+id/plantNameSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/section_label"
+        android:layout_below="@+id/textView1" />
+
+    <ListView
+        android:id="@+id/upList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/plantNameSpinner"
+        android:layout_below="@+id/plantNameSpinner" >
+    </ListView>
 
 </RelativeLayout>

@@ -12,8 +12,6 @@
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/section_label"
-        android:layout_alignTop="@+id/section_label"
         android:text="Relevés du jour"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -28,8 +26,25 @@
         android:id="@+id/upList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/plantNameSpinner"
-        android:layout_below="@+id/plantNameSpinner" >
+        android:layout_below="@+id/dateText"
+        android:scrollbars="vertical" >
     </ListView>
+
+    <EditText
+        android:id="@+id/dateText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/plantNameSpinner"
+        android:layout_below="@+id/plantNameSpinner"
+        android:ems="8" >
+    </EditText>
+
+    <Button
+        android:id="@+id/showButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/dateText"
+        android:layout_alignRight="@+id/upList"
+        android:text="Afficher" />
 
 </RelativeLayout>

@@ -103,9 +103,6 @@ public class DashboardActivity extends Activity implements
 				asyncTask();
 			}
 		});
-		
-		// TASK
-		asyncTask();
 	}
 	
 	@Override

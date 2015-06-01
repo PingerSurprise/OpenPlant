@@ -103,9 +103,6 @@ public class MainActivity extends Activity implements
 				asyncTask();
 			}
 		});
-		
-		// TASK
-		asyncTask();
 	}
 	
 	@Override
